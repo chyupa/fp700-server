@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/chyupa/fp700"
 	"github.com/chyupa/fp700/commands"
 	"io/ioutil"
 	"log"
@@ -10,7 +9,6 @@ import (
 )
 
 func Transaction(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
 	var transactionRequest commands.TransactionRequest
 
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -20,7 +18,6 @@ func Transaction(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal(reqBody, &transactionRequest.Commands)
 
-	fp700.Port = r.Header.Get("ComPort")
 	commandResponse := commands.Transaction(transactionRequest)
 
 	json.NewEncoder(w).Encode(commandResponse)

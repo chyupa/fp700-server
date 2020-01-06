@@ -9,7 +9,6 @@ import (
 )
 
 func SetFootersData(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
 	var footerRequest commands.SetFootersDataRequest
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -24,8 +23,6 @@ func SetFootersData(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetFootersData(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
 	footerResponse := commands.FootersData()
 
 	json.NewEncoder(w).Encode(footerResponse)

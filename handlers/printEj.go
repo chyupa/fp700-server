@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/chyupa/fp700"
 	"github.com/chyupa/fp700/commands"
 	"io/ioutil"
 	"log"
@@ -19,7 +18,6 @@ func PrintEj(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal(reqBody, &ejRequest)
 
-	fp700.Port = r.Header.Get("ComPort")
 	err = commands.PrintEj(ejRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

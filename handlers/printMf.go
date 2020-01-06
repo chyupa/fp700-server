@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/chyupa/fp700"
 	"github.com/chyupa/fp700/commands"
 	"io/ioutil"
 	"log"
@@ -18,7 +17,6 @@ func PrintMf(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal(reqBody, &mfRequest)
 
-	fp700.Port = r.Header.Get("ComPort")
 	err = commands.PrintMf(mfRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

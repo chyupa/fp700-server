@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/chyupa/fp700"
 	"github.com/chyupa/fp700/commands"
 	"io/ioutil"
 	"log"
@@ -12,10 +11,8 @@ import (
 type printReportRequest struct {
 	Type string `json:"type"`
 }
-func PrintReport(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-	fp700.Port = r.Header.Get("ComPort")
 
+func PrintReport(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal(err)

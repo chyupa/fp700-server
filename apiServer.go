@@ -4,36 +4,84 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/chyupa/apiServer/handlers"
+	"github.com/chyupa/apiServer/utils/logger"
 	"github.com/chyupa/fp700"
 	"github.com/gorilla/mux"
+	"github.com/kardianos/service"
 	"github.com/rs/cors"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 )
 
-var GeneralLogger *log.Logger
-var ErrorLogger *log.Logger
+type program struct{}
 
-func init() {
-	absPath, err := filepath.Abs("src/github.com/chyupa/apiServer")
-	if err != nil {
-		fmt.Println(err)
-	}
+func (p *program) Start(s service.Service) error {
+	go p.run()
 
-	generalLog, err := os.OpenFile(absPath+"/log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	return nil
+}
 
-	GeneralLogger = log.New(generalLog, "General logger: ", log.LstdFlags|log.Llongfile)
-	ErrorLogger = log.New(generalLog, "Error logger: ", log.LstdFlags|log.Llongfile)
+func (p *program) run() {
+	SetupServer()
+}
+
+func (p *program) Stop(s service.Service) error {
+	return nil
 }
 
 func main() {
+	svcConfig := &service.Config{
+		Name:        "ExchangeV2",
+		DisplayName: "ExchangeV2",
+		Description: "ExchangeV2 fiscal printer communication library",
+	}
+
+	prg := &program{}
+
+	s, err := service.New(prg, svcConfig)
+	if err != nil {
+		fmt.Println(err)
+		logger.Error.Println(err)
+	}
+
+	logg, err := s.Logger(nil)
+	if err != nil {
+		fmt.Println(err)
+		logger.Error.Println(err)
+	}
+
+	// read command line args
+	var argsWithoutProgName = os.Args[1:]
+
+	for _, param := range argsWithoutProgName {
+		if param == "install" {
+			err = s.Install()
+			if err != nil {
+				fmt.Println(err)
+				logg.Error(err)
+			} else {
+				fmt.Println("Service installed successfully.")
+			}
+		} else if param == "uninstall" {
+			err = s.Uninstall()
+			if err != nil {
+				logg.Error(err)
+			} else {
+				fmt.Println("Service uninstalled successfully.")
+			}
+		}
+	}
+
+	err = s.Run()
+	if err != nil {
+		fmt.Println(err)
+		logg.Error(err)
+	}
+}
+
+func SetupServer() {
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedHeaders: []string{"*"},
@@ -78,18 +126,20 @@ func main() {
 	api.HandleFunc("/vat/changes", handlers.GetVatChanges).Methods(http.MethodGet)
 	api.HandleFunc("/vat", handlers.SetVat).Methods(http.MethodPost)
 
-	api.Use(loggingMiddleware, setPortMiddleware, setJsonContentType)
+	api.Use(loggingMiddleware, setJsonContentType, setPortMiddleware)
 
-	ErrorLogger.Fatal(http.ListenAndServe(":8082", c.Handler(r)))
+	log.Fatal(http.ListenAndServe(":8082", c.Handler(r)))
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			ErrorLogger.Println(err)
+			fmt.Println(err)
+			logger.Error.Println(err)
 		}
-		GeneralLogger.Println(r.Method, r.RequestURI, string(reqBody))
+		fmt.Println(r.Method, r.RequestURI, string(reqBody))
+		logger.General.Println(r.Method, r.RequestURI, string(reqBody))
 
 		r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
 		next.ServeHTTP(w, r)
@@ -98,8 +148,13 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 func setPortMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fp700.Port = r.Header.Get("ComPort")
+		comPort := r.Header.Get("ComPort")
+		if len(comPort) < 1 {
+			http.Error(w, "110100", 500)
+			return
+		}
 
+		fp700.Port = comPort
 		next.ServeHTTP(w, r)
 	})
 }

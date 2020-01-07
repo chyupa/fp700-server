@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/chyupa/apiServer/utils/logger"
 	"github.com/chyupa/fp700/commands"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -15,13 +16,19 @@ type printReportRequest struct {
 func PrintReport(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		logger.Error.Println(err)
 	}
 	var prRequest printReportRequest
-	err = json.Unmarshal(reqBody, &prRequest)
-	log.Println(err)
+	json.Unmarshal(reqBody, &prRequest)
 
-	response := commands.PrintReport(prRequest.Type)
+	response, err := commands.PrintReport(prRequest.Type)
+	if err != nil {
+		fmt.Println(err)
+		logger.Error.Println(err)
+		http.Error(w, err.Error(), 400)
+		return
+	}
 
 	json.NewEncoder(w).Encode(response)
 }

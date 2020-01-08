@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/chyupa/apiServer/handlers"
-	"github.com/chyupa/apiServer/utils/logger"
 	"github.com/chyupa/fp700"
+	"github.com/chyupa/fp700-server/handlers"
+	"github.com/chyupa/fp700-server/utils/logger"
 	"github.com/gorilla/mux"
 	"github.com/kardianos/service"
 	"github.com/rs/cors"
@@ -101,7 +101,10 @@ func SetupServer() {
 	api.HandleFunc("/print/mf", handlers.PrintMf).Methods(http.MethodPost)
 
 	api.HandleFunc("/init-display", handlers.InitDisplay).Methods(http.MethodPost)
+
 	api.HandleFunc("/transaction", handlers.Transaction).Methods(http.MethodPost)
+	api.HandleFunc("/last-receipt", handlers.GetLastReceipt).Methods(http.MethodPost)
+
 	api.HandleFunc("/maintenance-data", handlers.MaintenanceData).Methods(http.MethodGet)
 
 	api.HandleFunc("/anaf-files", handlers.AnafFiles).Methods(http.MethodPost)
@@ -125,6 +128,18 @@ func SetupServer() {
 	api.HandleFunc("/vat", handlers.GetVat).Methods(http.MethodGet)
 	api.HandleFunc("/vat/changes", handlers.GetVatChanges).Methods(http.MethodGet)
 	api.HandleFunc("/vat", handlers.SetVat).Methods(http.MethodPost)
+
+	api.HandleFunc("/activate-service-password", handlers.ActivateServicePassword).Methods(http.MethodPost)
+	api.HandleFunc("/change-service-password", handlers.ChangeServicePassword).Methods(http.MethodPost)
+
+	api.HandleFunc("/set-printer-mode", handlers.SetPrinterMode).Methods(http.MethodPost)
+
+	api.HandleFunc("/fiscalize", handlers.Fiscalize).Methods(http.MethodPost)
+	api.HandleFunc("/fabrication-number", handlers.FabricationNumber).Methods(http.MethodPost)
+
+	api.HandleFunc("/close-dmje", handlers.CloseDmje).Methods(http.MethodPost)
+
+	api.HandleFunc("/last-z-date", handlers.GetLastZDate).Methods(http.MethodGet)
 
 	api.Use(loggingMiddleware, setJsonContentType, setPortMiddleware)
 

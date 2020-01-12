@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 )
 
 type program struct{}
@@ -61,15 +62,24 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 				logg.Error(err)
+				os.Exit(1)
 			} else {
 				fmt.Println("Service installed successfully.")
+				cmd := exec.Command("sc", "start", "ExchangeV2")
+				err := cmd.Run()
+				if err != nil {
+					panic("could not automatically start the Service. Please run this manually")
+				}
+				os.Exit(0)
 			}
 		} else if param == "uninstall" {
 			err = s.Uninstall()
 			if err != nil {
 				logg.Error(err)
+				os.Exit(1)
 			} else {
 				fmt.Println("Service uninstalled successfully.")
+				os.Exit(0)
 			}
 		}
 	}

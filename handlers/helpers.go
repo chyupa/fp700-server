@@ -115,6 +115,18 @@ func MaintenanceData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(commandResponse)
 }
 
+func GetFiscalization(w http.ResponseWriter, r *http.Request) {
+	response, err := commands.GetFiscalization()
+	if err != nil {
+		fmt.Println(err)
+		logger.Error.Println(err)
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	w.Write([]byte(response))
+}
+
 func GetOperatorName(w http.ResponseWriter, r *http.Request) {
 	operatorName, err := commands.GetOperatorName()
 	if err != nil {
@@ -185,7 +197,6 @@ func PrintDiagnostic(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("success"))
 }
-
 
 func Time(w http.ResponseWriter, r *http.Request) {
 	response, err := commands.Time()

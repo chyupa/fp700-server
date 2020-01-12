@@ -31,7 +31,6 @@ func PrintEj(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
-
 func PrintMf(w http.ResponseWriter, r *http.Request) {
 	var mfRequest commands.PrintMfRequest
 	reqBody, err := ioutil.ReadAll(r.Body)
@@ -96,6 +95,9 @@ func ReportEj(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/plain; charset=iso-8859-1")
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(response)))
+
 	w.Write([]byte(response))
 }
 
@@ -120,7 +122,6 @@ func ReportMf(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(commandResponse))
 }
 
-
 func AnafFiles(w http.ResponseWriter, r *http.Request) {
 	var anafFilesRequest commands.AnafFilesRequest
 
@@ -144,7 +145,6 @@ func AnafFiles(w http.ResponseWriter, r *http.Request) {
 	//w.Write(convJson)
 	json.NewEncoder(w).Encode(response)
 }
-
 
 func GetRemainingZReports(w http.ResponseWriter, r *http.Request) {
 	remainingZReports, err := commands.RemainingZReports()

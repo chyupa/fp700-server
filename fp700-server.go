@@ -106,6 +106,7 @@ func SetupServer() {
 	api.HandleFunc("/last-receipt", handlers.GetLastReceipt).Methods(http.MethodPost)
 
 	api.HandleFunc("/maintenance-data", handlers.MaintenanceData).Methods(http.MethodGet)
+	api.HandleFunc("/check-fiscalized", handlers.GetFiscalization).Methods(http.MethodGet)
 
 	api.HandleFunc("/anaf-files", handlers.AnafFiles).Methods(http.MethodPost)
 

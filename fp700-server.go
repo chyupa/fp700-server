@@ -114,6 +114,7 @@ func SetupServer() {
 
 	api.HandleFunc("/transaction", handlers.Transaction).Methods(http.MethodPost)
 	api.HandleFunc("/last-receipt", handlers.GetLastReceipt).Methods(http.MethodPost)
+	api.HandleFunc("/cash-in", handlers.ServiceAmount).Methods(http.MethodPost)
 
 	api.HandleFunc("/maintenance-data", handlers.MaintenanceData).Methods(http.MethodGet)
 	api.HandleFunc("/check-fiscalized", handlers.GetFiscalization).Methods(http.MethodGet)

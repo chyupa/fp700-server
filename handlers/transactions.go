@@ -33,19 +33,28 @@ func Transaction(w http.ResponseWriter, r *http.Request) {
 }
 
 func ServiceAmount(w http.ResponseWriter, r *http.Request) {
-	var saRequest commands.ServiceAmountRequest
+	type serviceAmountRequest struct {
+		Amount string `json:"amount"`
+	}
 
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	var saRequest = serviceAmountRequest{}
 	json.Unmarshal(reqBody, &saRequest)
 
 	// use response of command
-	commands.ServiceAmount(saRequest)
+	response, err := commands.ServiceAmount(saRequest.Amount)
+	if err != nil {
+		fmt.Println(err)
+		logger.Error.Println(err)
+		http.Error(w, err.Error(), 400)
+		return
+	}
 
-	w.Write([]byte("Success"))
+	json.NewEncoder(w).Encode(response)
 }
 
 func GetLastReceipt(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +73,8 @@ func GetLastReceipt(w http.ResponseWriter, r *http.Request) {
 
 	response, err := commands.LastReceipt(lrReq.Cancel)
 	if err != nil {
+		fmt.Println(err)
+		logger.Error.Println(err)
 		http.Error(w, err.Error(), 400)
 		return
 	}
